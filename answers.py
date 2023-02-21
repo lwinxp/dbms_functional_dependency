@@ -11,6 +11,7 @@ import copy
 def student_number():
     return 'A0211264U'
 
+## Q1a. Determine the closure of a given set of attribute S the schema R and functional dependency F
 def closure(R,F,S):
     # closure function can take multiple char
     # result = []
@@ -43,57 +44,6 @@ def closure(R,F,S):
     # print('=== is F modified? ===', F)
     return sorted(result)
 
-
-## Q1a. Determine the closure of a given set of attribute S the schema R and functional dependency F
-def singleton_closure(R, F, S):
-    # singleton closure can only take single char
-    closure = []
-    # print('=== singleton_closure S ===', S)
-
-    # itself
-    # closure.append(S)
-    for i in S:
-        closure.append(i)
-    # print('===closure1===', closure)
-
-    # direct
-    for fd in F:
-        # print('===fd===', fd)
-        # print('===fd[0]===', fd[0])
-        # print('===S===', S)
-
-        if fd[0] == S: 
-
-            for j in fd[1]:
-                # print('===j===', j)
-                closure.append(j)
-    # print('===closure2===', closure)
-
-    # indirect
-    for c in closure[1:]:
-        # if c != S cannot work
-        # print('===c===', c)
-
-        for fd in F:
-            # print('===fd===', fd)
-            # print('===fd[0]===', fd[0])
-            # print('===c-type===', type(c))
-            # print('===fd-type===', type(fd))
-
-            if fd[0] == [c]:
-                # print('=== fd[0] ===', fd[0])
-                # print('=== c ===', c)
-
-
-                for j in fd[1]:
-                    # print('=== j ===', j)
-                    # print('=== fd[1] ===', fd[1])
-
-                    closure.append(j)
-                    # print('===singleton_closure result ===', closure)
-    # return closure
-    # print('===singleton_closure final result ===', sorted(set(closure)))
-    return sorted(set(closure))
 
 ## Q1b. Determine all attribute closures excluding superkeys that are not candidate keys given the schema R and functional dependency F
 def all_closures(R, F): 
@@ -275,6 +225,11 @@ def min_cover(R, FD):
     # print('===simplify_attribute_FD_tuples ===', simplify_attribute_FD_tuples)
     simplify_attribute_FD.sort()
     # print('=== simplify_attribute_FD.sort() ===', simplify_attribute_FD)
+
+    # ====================================================================
+    # Remove repeat but must be same order - must include the .sort() step
+    # ====================================================================
+
     remove_repeat_fd = list(simplify_attribute_FD for simplify_attribute_FD,_ in groupby(simplify_attribute_FD))
     print('=== remove_repeat_fd===', remove_repeat_fd)
 
@@ -367,10 +322,42 @@ def min_cover(R, FD):
                 # print('=== temp length after reset r ===', len(temp))
 
 
+    # cover = copy.deepcopy(remove_repeat_fd) 
+    # temp = copy.deepcopy(remove_repeat_fd)
+    # idx_remove = []
+    # for r in range(len(temp)):
+    #     # if r <= len(temp) - 1:
+    #     print('=== r ===', r)
+    #     print('=== temp ===', temp)
 
+    #     print('=== temp[r] ===', temp[r])
 
-    # return finalList
-    # return remove_repeat_fd
+    #     r_value = temp.pop(r)
+    #     print('=== r_value ===', r_value)
+    #     print('=== temp after pop ===', temp)
+
+    #     attr_closure = closure(R,temp,r_value[0])
+    #     print('=== attr_closure ===', attr_closure)
+    #     print('=== r_value[0] ===', r_value[0])
+
+    #     print('=== temp after closure ===', temp)
+
+    #     print('=== set(r_value[1]).issubset(set(attr_closure)): ===', set(r_value[1]).issubset(set(attr_closure)))
+    #     if set(r_value[1]).issubset(set(attr_closure)):
+    #         # cover.remove(r_value) # because r is unnecessary, LHS attribute closure still contains RHS, even after remove r
+    #         idx_remove.append(r)
+    #         print('=== idx_remove append ===', idx_remove)
+
+        
+    #     temp = copy.deepcopy(remove_repeat_fd)
+    #         # temp.insert(r, r_value)
+    #     print('=== temp after insert ===', temp)
+
+    # print('=== idx_remove reverse pop ===', idx_remove)
+    # for i in sorted(idx_remove, reverse=True):
+    #     del cover[i]
+    #     print('=== cover reverse pop ===', cover)
+
     return cover
 
 
@@ -404,21 +391,6 @@ def min_covers(R, FD):
 
     '''
 
-    # afd = list(permutations(FD))
-    # print('=== afd ===', afd)
-
-    # intermediate = []
-    # for a in afd:
-    #     cover = min_cover(R,a)
-    #     intermediate.append(cover)
-
-    # remove_repeat = list(intermediate for intermediate,_ in groupby(intermediate))
-
-    # return remove_repeat
-
-
-    #########################################################
-
     print('=== FD ===', FD)
     singleton_attribute_list = []
 
@@ -431,9 +403,9 @@ def min_covers(R, FD):
 
     closures = all_closures(R,FD)
 
-    print('=== singleton_attribute_list reverse ===', singleton_attribute_list[::-1])
+    # print('=== singleton_attribute_list reverse ===', singleton_attribute_list[::-1])
 
-    simplify_attribute_FD = singleton_attribute_list# try reverse here
+    simplify_attribute_FD = singleton_attribute_list
     for fd in simplify_attribute_FD: 
 
         '''
@@ -462,9 +434,22 @@ def min_covers(R, FD):
 
     print('=== simplify_attribute_FD ===', simplify_attribute_FD)
 
+    # ====================================================================
+    # Remove repeat but must be same order - must include the .sort() step
+    # ====================================================================
     simplify_attribute_FD.sort()
     remove_repeat_fd = list(simplify_attribute_FD for simplify_attribute_FD,_ in groupby(simplify_attribute_FD))
     print('=== remove_repeat_fd===', remove_repeat_fd)
+
+    # lhs_fd_set = set()
+    # rhs_fd_set = set()
+
+    # for rrf in remove_repeat_fd:
+    #     lhs_fd_set.update(''.join(rrf[0]))
+    #     rhs_fd_set.update(''.join(rrf[1]))
+    # print('=== lhs_fd_set ===', lhs_fd_set)
+    # print('=== rhs_fd_set ===', rhs_fd_set)
+
 
     '''
     remove redundant fd, to check
@@ -482,6 +467,9 @@ def min_covers(R, FD):
     # # hardcode permutate_list
     # permutate_list1 = [[[['A'], ['C']], [['B'], ['C']], [['C'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['C'], ['A']], [['C'], ['B']], [['B'], ['A']]], [[['A'], ['C']], [['B'], ['A']], [['B'], ['C']], [['C'], ['B']]], [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['B']], [['C'], ['A']], [['C'], ['B']], [['B'], ['C']]], [[['A'], ['B']], [['B'], ['A']], [['B'], ['C']], [['C'], ['B']]], [[['A'], ['B']], [['B'], ['A']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['B']], [['A'], ['C']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['B']], [['A'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['B']], [['A'], ['C']], [['B'], ['A']], [['C'], ['A']]]]
     
+    # ==============================================================================================
+    # Another approach below - iterate without range length of list
+    # ===============================================================================================
     # permutate_list = [[[['A'], ['C']], [['B'], ['C']], [['C'], ['B']], [['C'], ['A']]], [[['A'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['B'], ['A']], [['C'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['B'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['B']], [['B'], ['C']], [['C'], ['B']], [['C'], ['A']]], [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['B']], [['B'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['B']], [['B'], ['C']], [['B'], ['A']], [['C'], ['A']]], [[['A'], ['C']], [['A'], ['B']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['C']], [['A'], ['B']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['A'], ['B']], [['B'], ['A']], [['C'], ['A']]]]
     # for pl in permutate_list:
     #     cover = copy.deepcopy(pl) 
@@ -511,95 +499,189 @@ def min_covers(R, FD):
     #             temp = copy.deepcopy(cover)
     #     result.append(cover)
 
-    
+    # ==============================================================================================
+    # Another approach below - regen temp every iteration and collect index to pop at end toegether
+    # ===============================================================================================
+
+    # for pt in permutate_list:
+    #     cover = copy.deepcopy(pt) 
+    #     temp = copy.deepcopy(pt)
+
+    #     lhs_cover_dict = defaultdict(int)
+    #     # for lhs in lhs_fd_set:
+    #     #     lhs_cover_dict[lhs] = 0
+    #     for c in cover:
+    #         lhs_cover_dict[''.join(c[0])] += 1
+    #     rhs_cover_dict = defaultdict(int)
+    #     # for rhs in rhs_fd_set:
+    #     #     rhs_cover_dict[rhs] = 0
+    #     for c in cover:
+    #         rhs_cover_dict[''.join(c[1])] += 1
+    #     print('=== initial lhs_cover_dict ===', lhs_cover_dict)
+    #     print('=== initial rhs_cover_dict ===', rhs_cover_dict)
+    #     idx_remove = []
+    #     for r in range(len(temp)):
+
+    #         # if r <= len(temp) - 1:
+    #         print('=== r ===', r)
+    #         print('=== temp ===', temp)
+
+    #         print('=== temp[r] ===', temp[r])
+    #         # temp_before_pop = copy.deepcopy(temp) 
+    #         r_value = temp.pop(r)
+    #         # temp_after_pop = copy.deepcopy(temp) 
+    #         print('=== r_value ===', r_value)
+    #         # print('=== temp after pop ===', temp)
+
+    #         print('=== r_value[0] before closure ===', r_value[0])
+
+    #         attr_closure = closure(R,temp,r_value[0])
+    #         print('=== attr_closure ===', attr_closure)
+    #         print('=== r_value[0] after closure ===', r_value[0])
+
+    #         print('=== temp after closure ===', temp)
+
+    #         print('=== set(r_value[1]).issubset(set(attr_closure)): ===', set(r_value[1]).issubset(set(attr_closure)))
+    #         if set(r_value[1]).issubset(set(attr_closure)):
+    #             print('=== lhs_cover_dict ===', lhs_cover_dict)
+    #             print('=== rhs_cover_dict ===', rhs_cover_dict)
+    #             if lhs_cover_dict[''.join(r_value[0])] > 1 and rhs_cover_dict[''.join(r_value[0])] > 1:
+    #                 cover.pop(r)
+    #                 idx_remove.append(r)
+    #             else:
+    #                 print('=== avoid ===')
+
+
+    #             # lhs_cover_set = set()
+    #             # rhs_cover_set = set()
+    #             # for c in cover:
+    #             #     lhs_cover_set.update(''.join(c[0]))
+    #             #     rhs_cover_set.update(''.join(c[1]))
+    #             # print('=== lhs_cover_set ===', lhs_cover_set)
+    #             # print('=== rhs_cover_set ===', rhs_cover_set)
+    #             # print('=== lhs_cover_set == lhs_fd_set ===', lhs_cover_set == lhs_fd_set)
+    #             # print('=== rhs_cover_set == rhs_fd_set ===', rhs_cover_set == rhs_fd_set)
+
+    #             # if lhs_cover_set == lhs_fd_set and rhs_cover_set == rhs_fd_set:
+    #             # # if rhs_cover_set == rhs_fd_set:
+    #             #     cover.pop(r) # because r is unnecessary, LHS attribute closure still contains RHS, even after remove r
+    #             #     idx_remove.append(r)
+    #             #     print('=== idx_remove append ===', idx_remove)
+
+    #         temp = copy.deepcopy(pt)
+    #             # temp.insert(r, r_value)
+            
+    #         #     temp = copy.deepcopy(temp_after_pop)
+    #         # else:
+    #         #     temp = copy.deepcopy(temp_before_pop)
+
+    #             # temp.insert(r, r_value)
+    #         # print('=== temp after insert ===', temp)
+
+
+    #     # for i in sorted(idx_remove, reverse=True):
+    #     #     del cover[i]
+
+
+    #     # lhs_cover_set = set()
+    #     # rhs_cover_set = set()
+    #     # for i in sorted(idx_remove, reverse=True):
+    #     #     print('=== idx_remove cover ===', cover)
+    #     #     for c in cover:
+    #     #         lhs_cover_set.update(''.join(c[0]))
+    #     #         rhs_cover_set.update(''.join(c[1]))
+    #     #     print('=== lhs_cover_set ===', lhs_cover_set)
+    #     #     print('=== rhs_cover_set ===', rhs_cover_set)
+    #     #     print('=== lhs_cover_set == lhs_fd_set ===', lhs_cover_set == lhs_fd_set)
+    #     #     print('=== rhs_cover_set == rhs_fd_set ===', rhs_cover_set == rhs_fd_set)
+
+    #     #     if lhs_cover_set == lhs_fd_set and rhs_cover_set == rhs_fd_set:
+    #     #     # if rhs_cover_set == rhs_fd_set:
+    #     #         del cover[i]
+    #     #     print('=== cover reverse pop ===', cover)
+
+
+    #     print('=== cover ===', cover)
+    #     result.append(cover)
+    # print('=== result after cover ===', result)
+
+    # ========================
+    # Another approach below
+    # ========================
 
     for pt in permutate_list:
         cover = copy.deepcopy(pt) 
         temp = copy.deepcopy(pt)
         for r in range(len(temp)):
+            print('=== r ===', r)
+
             if r <= len(temp) - 1:
+                print('=== temp ===', temp)
+
+                print('=== temp[r] ===', temp[r])
+
                 r_value = temp.pop(r)
+                print('=== r_value ===', r_value)
 
                 attr_closure = closure(R,temp,r_value[0])
+                print('=== attr_closure ===', attr_closure)
+                print('=== r_value[0] ===', r_value[0])
 
+                print('=== temp after closure ===', temp)
+
+                print('=== set(r_value[1]).issubset(set(attr_closure)): ===', set(r_value[1]).issubset(set(attr_closure)))
                 if set(r_value[1]).issubset(set(attr_closure)):
                     cover.pop(r) # because r is unnecessary, LHS attribute closure still contains RHS, even after remove r
                 else:
                     temp = copy.deepcopy(cover)
+                    # temp.insert(r, r_value)
+                    # print('=== temp after insert ===', temp)
+
+        print('=== cover ===', cover)
         result.append(cover)
 
     # print('=== result===', result)
-
-    # order does not matter
-    # result_list = [sorted(i) for i in result]
-    # result.sort()
-    # intermediate1 = list(result for result,_ in groupby(result))
-    # intermediate2 = [sorted(i) for i in intermediate1]
-    # final = list(intermediate2 for intermediate2,_ in groupby(intermediate2))
     
-    # TODO: LHS not able to handle multiple attributes
-    # use dictionary to cancel out order effect, cancel repeats
-    result_dict_list = []
-    for re in result:
-        # print('=== re ===', re)
-        result_dict = defaultdict(set)
-        for r in re:
-            # print('=== r ===', r)
-            # print('=== r[0] ===', r[0])
-            # print('=== r[1] ===', r[1])
-            result_dict[''.join(r[0])].update(r[1])
-            # print('=== result_dict ===', result_dict)
+    final_list = removeRepeatFd(result)
 
-        if result_dict not in result_dict_list:
-            result_dict_list.append(result_dict)
-
-    # convert dictionary back to list
-    final_list = []
-    for d in result_dict_list:
-        # print('=== d ===', d)
-        final_sublist = []
-        for k,v in d.items():
-            for i in v:
-                final_sublist.append([[k],[i]])
-
-        # splitting multiple attributes in LHS
-        # print('=== final_sublist ===', final_sublist)
-        for fs in final_sublist:
-            # print('=== fs ===', fs)
-            # print('=== len(''.join(fs[0])) ===', len(''.join(fs[0])))
-            if len(''.join(fs[0])) > 1:
-                # print('=== fs[0] ===', fs[0])
-                fs[0] = list(fs[0][0])
-        final_list.append(final_sublist)
+    # =================================================================
+    # Abstracted to function below - remove repeat regardless of order
+    # =================================================================
     
-
-            
-
-
-
-    # ff = sorted(final)
-    # unique = []
+    # result_dict_list = []
     # for re in result:
+    #     # print('=== re ===', re)
+    #     result_dict = defaultdict(set)
+    #     for r in re:
+    #         # print('=== r ===', r)
+    #         # print('=== r[0] ===', r[0])
+    #         # print('=== r[1] ===', r[1])
+    #         result_dict[''.join(r[0])].update(r[1])
+    #         # print('=== result_dict ===', result_dict)
 
-    #     st = set()
-    #     st.update(re)
-    #     print('=== re ===', re)
-    #     print('=== st ===', st)
+    #     if result_dict not in result_dict_list:
+    #         result_dict_list.append(result_dict)
 
-        # re_tuple = [tuple(r) for r in re]
-        # print('=== re_tuple ===', re_tuple)
-        # re_set = tuple(re_tuple)
-        # print('=== re_set ===', re_set)
-        # s = sorted(set(tuple(re)))
-        # if s not in unique:
-        #     unique.append(s)
+    # # convert dictionary back to list
+    # final_list = []
+    # for d in result_dict_list:
+    #     # print('=== d ===', d)
+    #     final_sublist = []
+    #     for k,v in d.items():
+    #         for i in v:
+    #             final_sublist.append([[k],[i]])
 
-    # sorted_result = [sorted(r) for r in result]
-    # grouped_result = list(sorted_result for sorted_result,_ in groupby(sorted_result))
-
+    #     # splitting multiple attributes in LHS
+    #     # print('=== final_sublist ===', final_sublist)
+    #     for fs in final_sublist:
+    #         # print('=== fs ===', fs)
+    #         # print('=== len(''.join(fs[0])) ===', len(''.join(fs[0])))
+    #         if len(''.join(fs[0])) > 1:
+    #             # print('=== fs[0] ===', fs[0])
+    #             fs[0] = list(fs[0][0])
+    #     final_list.append(final_sublist)
+    
     return final_list
-
-    # return []
 
 ## Q2c. Return all minimal covers of a given schema R and functional dependencies F.
 def all_min_covers(R, FD):
@@ -639,50 +721,114 @@ def all_min_covers(R, FD):
     simplify will be smaller and faster
     '''
     FD2 = copy.deepcopy(FD1)
-    # FD2 = [[['A'], ['C']], [['B'], ['A']], [['C'], ['B']]]
-    # FD2 = [[['A'], ['B']], [['A'], ['C']], [['B'], ['A']], [['B'], ['C']], [['C'], ['A']], [['C'], ['B']]]
-    
-    # FD2 = [[['A'], ['B']], [['A'], ['C']], [['B'], ['A']], [['B'], ['C']], [['C'], ['A']]] 
-
-    # FD2 = [[['A'], ['B']], [['A'], ['C']], [['B'], ['A']], [['B'], ['C']], [['C'], ['A']], [['C'], ['B']]] 
-
-
-    print('=== FD2 ===', FD2)
+    # print('=== FD2 ===', FD2)
 
     for fd in FD2:
-        print('=== fd ===', fd)
-        print('=== fd[0] ===', fd[0])
-        print('=== fd[1] ===', fd[1])
-        print('=== set(fd[0]).issubset(set(fd[1])) ===', set(fd[0]).issubset(set(fd[1])))
+        # print('=== fd ===', fd)
+        # print('=== fd[0] ===', fd[0])
+        # print('=== fd[1] ===', fd[1])
+        # print('=== set(fd[0]).issubset(set(fd[1])) ===', set(fd[0]).issubset(set(fd[1])))
 
         if set(fd[0]).issubset(set(fd[1])):
             fd[1].remove(fd[0][0])
-            print('=== fd ===', fd)
+            # print('=== fd ===', fd)
 
     # [[['A'], ['B', 'C']], 
     # [['B'], ['A','C']], 
     # [['C'], ['A', 'B']]]
-
-    # [[['A'], ['B', 'C']], 
-    # [['B'], ['A','C']], 
-    # [['C'], ['A', 'B']]]
-
-    # [[['A'], ['C']], [['B'], ['A']], [['C'], ['B']]]
-
-    
-    # [[['A'], ['B']], 
-    # [['B'], ['C']], 
-    # [['C'], ['A']]]
 
     # '''
     # calculate min_covers for simplified sigma+
     # TODO: can sigma+ be simplified in more ways for min_covers to get the example answer directly?
-    # need to hardcode and trial & error... but not sure why
     # '''
 
     print('=== FD2 ===', FD2)
+    # final = min_covers(R, FD2)
     result = min_covers(R, FD2)
-    # print('=== result ===', result)
+
+    # print('=== final ===', final)
+
+    intermediate = []
+    # result = [[[['A'], ['C']], [['B'], ['C']], [['C'], ['B']], [['C'], ['A']]], [[['A'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['B'], ['A']], [['C'], ['B']], [['C'], ['A']]], [[['A'], ['C']], [['B'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['B']], [['B'], ['C']], [['C'], ['B']], [['C'], ['A']]], [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['B']], [['B'], ['C']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['B']], [['B'], ['C']], [['B'], ['A']], [['C'], ['A']]], [[['A'], ['C']], [['A'], ['B']], [['B'], ['C']], [['C'], ['A']]], [[['A'], ['C']], [['A'], ['B']], [['B'], ['A']], [['C'], ['B']]], [[['A'], ['C']], [['A'], ['B']], [['B'], ['A']], [['C'], ['A']]]]
+    for re in result:
+        print('=== re ===', re)
+        cover = copy.deepcopy(re) 
+        temp = copy.deepcopy(re)
+        idx_remove = []
+        for r in range(len(temp)):
+            # if r <= len(temp) - 1:
+            print('=== r ===', r)
+            print('=== temp ===', temp)
+
+            print('=== temp[r] ===', temp[r])
+
+            r_value = temp.pop(r)
+            print('=== r_value ===', r_value)
+
+            attr_closure = closure(R,temp,r_value[0])
+            print('=== attr_closure ===', attr_closure)
+            print('=== r_value[0] ===', r_value[0])
+
+            print('=== temp after closure ===', temp)
+
+            print('=== set(r_value[1]).issubset(set(attr_closure)): ===', set(r_value[1]).issubset(set(attr_closure)))
+            if set(r_value[1]).issubset(set(attr_closure)):
+                # cover.remove(r_value) # because r is unnecessary, LHS attribute closure still contains RHS, even after remove r
+                idx_remove.append(r)
+                print('=== idx_remove append ===', idx_remove)
+
+            
+            temp = copy.deepcopy(re)
+                # temp.insert(r, r_value)
+            print('=== temp after insert ===', temp)
+
+        print('=== idx_remove reverse pop ===', idx_remove)
+        for i in sorted(idx_remove, reverse=True):
+            del cover[i]
+            print('=== cover reverse pop ===', cover)
+
+
+        print('=== cover ===', cover)
+        intermediate.append(cover)
+    
+    final_list = removeRepeatFd(intermediate)
+
+    # =================================================================
+    # Abstracted to function below - remove repeat regardless of order
+    # =================================================================
+
+    # result_dict_list = []
+    # for re in intermediate:
+    #     # print('=== re ===', re)
+    #     result_dict = defaultdict(set)
+    #     for r in re:
+    #         # print('=== r ===', r)
+    #         # print('=== r[0] ===', r[0])
+    #         # print('=== r[1] ===', r[1])
+    #         result_dict[''.join(r[0])].update(r[1])
+    #         # print('=== result_dict ===', result_dict)
+
+    #     if result_dict not in result_dict_list:
+    #         result_dict_list.append(result_dict)
+
+    # # convert dictionary back to list
+    # final_list = []
+    # for d in result_dict_list:
+    #     # print('=== d ===', d)
+    #     final_sublist = []
+    #     for k,v in d.items():
+    #         for i in v:
+    #             final_sublist.append([[k],[i]])
+
+    #     # splitting multiple attributes in LHS
+    #     # print('=== final_sublist ===', final_sublist)
+    #     for fs in final_sublist:
+    #         # print('=== fs ===', fs)
+    #         # print('=== len(''.join(fs[0])) ===', len(''.join(fs[0])))
+    #         if len(''.join(fs[0])) > 1:
+    #             # print('=== fs[0] ===', fs[0])
+    #             fs[0] = list(fs[0][0])
+    #     final_list.append(final_sublist)
     # '''
     # At this point, result of 11 lists already contains the 5 lists in the example answer
     # maybe min_covers algo not fully correct, that's why didn't get 5 lists in example answer only?
@@ -739,19 +885,94 @@ def all_min_covers(R, FD):
     # final.append(reverse)
 
     # return final
-    return result
+    return final_list
 
 ## You can add additional functions below
 
-# def reflexivity(lhs, rhsList):
-#     result = []
-#     for rhs in rhsList:
-#         if rhs in lhs:
-#             result.append([lhs,rhs])
-#     return result
+def singleton_closure(R, F, S):
+    # singleton closure can only take single char
+    closure = []
+    # print('=== singleton_closure S ===', S)
 
-# def augmentation(iter):
-#     return []
+    # itself
+    # closure.append(S)
+    for i in S:
+        closure.append(i)
+    # print('===closure1===', closure)
+
+    # direct
+    for fd in F:
+        # print('===fd===', fd)
+        # print('===fd[0]===', fd[0])
+        # print('===S===', S)
+
+        if fd[0] == S: 
+
+            for j in fd[1]:
+                # print('===j===', j)
+                closure.append(j)
+    # print('===closure2===', closure)
+
+    # indirect
+    for c in closure[1:]:
+        # if c != S cannot work
+        # print('===c===', c)
+
+        for fd in F:
+            # print('===fd===', fd)
+            # print('===fd[0]===', fd[0])
+            # print('===c-type===', type(c))
+            # print('===fd-type===', type(fd))
+
+            if fd[0] == [c]:
+                # print('=== fd[0] ===', fd[0])
+                # print('=== c ===', c)
+
+
+                for j in fd[1]:
+                    # print('=== j ===', j)
+                    # print('=== fd[1] ===', fd[1])
+
+                    closure.append(j)
+                    # print('===singleton_closure result ===', closure)
+    # return closure
+    # print('===singleton_closure final result ===', sorted(set(closure)))
+    return sorted(set(closure))
+
+def removeRepeatFd(result):
+    result_dict_list = []
+    for re in result:
+        # print('=== re ===', re)
+        result_dict = defaultdict(set)
+        for r in re:
+            # print('=== r ===', r)
+            # print('=== r[0] ===', r[0])
+            # print('=== r[1] ===', r[1])
+            result_dict[''.join(r[0])].update(r[1])
+            # print('=== result_dict ===', result_dict)
+
+        if result_dict not in result_dict_list:
+            result_dict_list.append(result_dict)
+
+    # convert dictionary back to list
+    final_list = []
+    for d in result_dict_list:
+        # print('=== d ===', d)
+        final_sublist = []
+        for k,v in d.items():
+            for i in v:
+                final_sublist.append([[k],[i]])
+
+        # splitting multiple attributes in LHS
+        # print('=== final_sublist ===', final_sublist)
+        for fs in final_sublist:
+            # print('=== fs ===', fs)
+            # print('=== len(''.join(fs[0])) ===', len(''.join(fs[0])))
+            if len(''.join(fs[0])) > 1:
+                # print('=== fs[0] ===', fs[0])
+                fs[0] = list(fs[0][0])
+        final_list.append(final_sublist)
+    return final_list
 
 def allCombinations(l):
     # TODO: refactor to use itertools.powerset()
@@ -766,61 +987,21 @@ def allCombinations(l):
             result.append(j)
     return result
 
-# def reflexivity(x):
-#     result = []
-#     # chars = [char for char in l]
-#     chars = [''.join(l) for i in range(len(x)) for l in combinations(x, i+1)]
-#     for char in chars:
-#         result.append([x,char])
-#     return result
-    
-# def calcReflexivity(allCombinations):
-#     result = []
-#     for ac in allCombinations:
-#         result.append(reflexivity(ac))
-#         flatten_result = [item for sublist in result for item in sublist]
-#     return flatten_result
-
-# def transitivity(allCombinations):
-
-# def listToDict(ll):
-#     newlist = []
-#     for l in ll:
-#         print('=== l ===', l)
-#         # newdict = defaultdict(str)
-#         newdict = defaultdict(list)
-
-#         for i in l:
-#             print('=== i ===', i)
-#             # newdict[''.join(i[0])]+=(i[1][0])
-#             newdict[''.join(i[0])].append(i[1][0])
-
-#         newlist.append(newdict)
-#     return newlist
-
-# def listToDict(ll):
-#     # newlist = []
-#     # for l in ll:
-#     #     print('=== l ===', l)
-#     newdict = defaultdict(list)
-#     for i in ll:
-#         print('=== i ===', i)
-#         newdict[''.join(i[0])].append(i[1])
-#     # newlist.append(newdict)
-#     return newdict
 
 ## Main functions
 def main():
     ### Test case from the project
-    # R = ['A', 'B', 'C', 'D']
-    # FD = [[['A', 'B'], ['C']], [['C'], ['D']]]
+    R = ['A', 'B', 'C', 'D']
+    FD = [[['A', 'B'], ['C']], [['C'], ['D']]]
 
     # print(closure(R, FD, ['A']))
-    # print(closure(R, FD, ['A', 'B']))
+    print('Qn 1a === closure ===')
+    print(closure(R, FD, ['A', 'B']))
     
-    # R = ['A', 'B', 'C', 'D']
-    # FD = [[['A', 'B'], ['C']], [['C'], ['D']]]
-    # print(all_closures(R, FD))
+    R = ['A', 'B', 'C', 'D']
+    FD = [[['A', 'B'], ['C']], [['C'], ['D']]]
+    print('Qn 1b === all_closures ===')
+    print(all_closures(R, FD))
 
     # R1 = ['A', 'B', 'C']
     # FD1 = [[['A'], ['B', 'C']], [['B'], ['C']], [['A'], ['B']], [['A','B'], ['C']]] # example from https://www.tutorialspoint.com/what-is-the-minimal-set-of-functional-dependencies-or-canonical-cover-of-fd
@@ -837,9 +1018,10 @@ def main():
     # FD = [[['A', 'B'], ['C', 'D', 'E']], [['A', 'C'], ['B','D', 'E']], [['B'], ['C']], [['C'], ['B']], [['C'], ['D']], [['B'],['E']], [['C'],['E']]] 
     # print('=== 2nd example min_cover ===', min_cover(R, FD)) 
 
-    # R = ['A', 'B', 'C', 'D', 'E', 'F']
-    # FD = [[['A'], ['B', 'C']], [['B'], ['C','D']], [['D'], ['B']], [['A','B','E'], ['F']]] 
-    # print('=== 3rd complex min_cover ===', min_cover(R, FD)) 
+    R = ['A', 'B', 'C', 'D', 'E', 'F']
+    FD = [[['A'], ['B', 'C']], [['B'], ['C','D']], [['D'], ['B']], [['A','B','E'], ['F']]] 
+    print('Qn 2a === min_cover - matches answer key, might not be same ordering ===')
+    print(min_cover(R, FD)) 
 
     # R = ['A', 'B', 'C']
     # FD = [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]] 
@@ -847,9 +1029,10 @@ def main():
 
     # print('============== min_covers ==================')
 
-    # R = ['A', 'B', 'C']
-    # FD = [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]] 
-    # print('=== 1st reachable min_covers ===', min_covers(R, FD))
+    R = ['A', 'B', 'C']
+    FD = [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]] 
+    print('Qn 2b === min_covers ===')
+    print(min_covers(R, FD))
 
     # R = ['A', 'B', 'C', 'D', 'E']
     # FD = [[['A', 'B'], ['C', 'D', 'E']], [['A', 'C'], ['B','D', 'E']], [['B'], ['C']], [['C'], ['B']], [['C'], ['D']], [['B'],['E']], [['C'],['E']]] 
@@ -859,87 +1042,14 @@ def main():
     # FD = [[['A'], ['B', 'C']], [['B'], ['C','D']], [['D'], ['B']], [['A','B','E'], ['F']]] 
     # print('=== 3nd reachable min_covers ===', min_covers(R, FD)) 
 
-    print('============== all_min_covers ==================')
+    # print('============== all_min_covers ==================')
     R = ['A', 'B', 'C']
     FD = [[['A'], ['B']], [['B'], ['C']], [['C'], ['A']]] 
-    print('=== all_min_covers ===', all_min_covers(R, FD)) 
+    print('Qn 2c === all_min_covers - matches answer key, might not be same ordering ===') 
+    print(all_min_covers(R, FD)) 
 
     # R = ['A','B','C','D','E','F','G']
     # FD = [[['A','C'],['G']], [['D'],['E','G']], [['B','C'],['D']], [['C','G'],['B','D']], [['A','C','D'],['B']], [['C','E'],['A','G']]]
-
-    # print('=== example all_closures ===',all_closures(R,FD))
-    # print('=== example min_cover ===',min_cover(R,FD))
-
-
-#     # print('========= calcReflexivity ============', calcReflexivity(allCombinations(['A','B'])))
-
-#     R1 = ['A', 'B', 'C', 'D', 'E']
-#     print('========= allCombinations ============', allCombinations(R1))
-
-#     FD1 = [[['A', 'B'], ['C', 'D', 'E']], [['A', 'C'], ['B','D','E']], [['B'],['C']], [['C'],['B']], [['C'],['D']], [['B'],['E']], [['C'],['E']]]
-
-#     """
-#     B case
-
-#     Itself
-#     closure add B
-#     closure = B
-
-#     Direct
-#     LHS == B
-#     closure add C
-#     closure add E
-#     closure = B, C, E
-
-
-#     Indirect
-#     closure = B, C, E
-
-
-#     """
-
-
-#     print('=== closure A ===', closure(R1, FD1, ['A']))
-#     print('=== closure B ===', closure(R1, FD1, ['B']))
-#     print('=== closure C ===', closure(R1, FD1, ['C']))
-#     print('=== closure D ===', closure(R1, FD1, ['D']))
-#     print('=== closure E ===', closure(R1, FD1, ['E']))
-
-#     print('=== closure AB ===', closure(R1, FD1, ['A','B']))
-#     print('=== closure AC ===', closure(R1, FD1, ['A','C']))
-#     print('=== closure AD ===', closure(R1, FD1, ['A','D']))
-#     print('=== closure AE ===', closure(R1, FD1, ['A','E']))
-#     print('=== closure BC ===', closure(R1, FD1, ['B','C']))
-#     print('=== closure BD ===', closure(R1, FD1, ['B','D'])) 
-#     ### REALISATION, the PAIR COVERS need to INCLUDE the SINGLETON COVERS!!!
-#     ### BD closure need to include B closure and D closure as well!!!
-#     ### WRONG!!! call closure on all constituents individually, and merge the result back into set
-#     ### closure function can only be used to calculate singleton cover!!!
-#     ### CORRECT!!! pair cover must call closure function separately on each constituent and merge their closures into set!!!
-
-#     ### def singleton_closure
-#     ### def closure calls singleton_closure on each constituent, merges results into set
-
-#     print('=== closure BE ===', closure(R1, FD1, ['B','E']))
-#     print('=== closure CD ===', closure(R1, FD1, ['C','D']))
-#     print('=== closure CE ===', closure(R1, FD1, ['C','E']))
-#     print('=== closure DE ===', closure(R1, FD1, ['D','E']))
-
-#     print('=== closure ADE ===', closure(R1, FD1, ['A', 'D', 'E']))
-#     print('=== closure BDE ===', closure(R1, FD1, ['B', 'D','E']))
-#     print('=== closure CDE ===', closure(R1, FD1, ['C','D','E']))
-#     print('=== closure BCE ===', closure(R1, FD1, ['B','C','E']))
-#     print('=== closure BCD ===', closure(R1, FD1, ['B','C','D']))
-
-#     print('=== closure BCDE ===', closure(R1, FD1, ['B','C','D','E']))
-
-
-#     print(all_closures(R1, FD1)) ### all_closures function needs to call closure function on allcombinations
-
-#     # TODO: all_closures still not correct answer!!!
-
-#     # print('=== all_closures ===', all_closures(R1, FD1))
-
 
 
 #     ### Add your own additional test cases if necessary
